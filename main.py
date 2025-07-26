@@ -8,14 +8,14 @@ import sqlite3
 from datetime import datetime
 import os
 from dotenv import load_dotenv
-from bot_logic import ECLABot
+from gpt_bot_logic import GPTECLABot
 
 load_dotenv()
 
 app = FastAPI(title="ECLA WhatsApp Service Matching Bot")
 
-# Initialize bot
-bot = ECLABot()
+# Initialize GPT-powered bot
+bot = GPTECLABot()
 
 # Database setup
 def init_db():
@@ -64,31 +64,30 @@ async def favicon():
 @app.post("/webhook")
 async def whatsapp_webhook(request: Request):
     try:
-        body = await request.json()
+        # Twilio sends form data, not JSON
+        form_data = await request.form()
         
-        # Extract message data (adjust based on your WhatsApp API)
-        if 'entry' in body and body['entry']:
-            entry = body['entry'][0]
-            if 'changes' in entry and entry['changes']:
-                change = entry['changes'][0]
-                if 'value' in change and 'messages' in change['value']:
-                    message = change['value']['messages'][0]
-                    
-                    # Extract message details
-                    user_phone = message['from']
-                    message_text = message['text']['body']
-                    
-                    # Process the message using enhanced bot logic
-                    response = bot.process_message(user_phone, message_text)
-                    
-                    # Here you would send the response back to WhatsApp
-                    # For now, we'll just return it
-                    return {"response": response, "user_phone": user_phone}
+        # Extract message data from Twilio format
+        message_text = form_data.get("Body", "")
+        user_phone = form_data.get("From", "")
+        
+        if message_text and user_phone:
+            # Process the message using enhanced bot logic
+            response = bot.process_message(user_phone, message_text)
+            
+            # Return TwiML response for WhatsApp
+            return HTMLResponse(f"""
+            <?xml version="1.0" encoding="UTF-8"?>
+            <Response>
+                <Message>{response}</Message>
+            </Response>
+            """, media_type="application/xml")
         
         return {"status": "received"}
     
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        print(f"Webhook error: {e}")
+        return {"status": "error", "detail": str(e)}
 
 # Simple web interface
 @app.get("/", response_class=HTMLResponse)
