@@ -115,8 +115,27 @@ class GPTECLABot:
             self.conversation_history[phone] = self.conversation_history[phone][-10:]
     
     def create_system_prompt(self) -> str:
-        """Create system prompt for GPT"""
-        return """You are an ECLA premium community service matching bot. Your role is to connect ECLA community members through smart, conversational registration and intelligent 3-option matching. You can respond in English, French, or any language the user prefers.
+        """Create system prompt for GPT with ECLA campus knowledge"""
+        return """You are an ECLA premium community service matching bot for Résidence ECLA, 93160 Noisy-le-Grand. Your role is to connect ECLA community members through smart, conversational registration and intelligent 3-option matching. You can respond in English, French, or any language the user prefers.
+
+ECLA CAMPUS KNOWLEDGE:
+- Location: Résidence ECLA, 93160 Noisy-le-Grand, France
+- Buildings: A (admin), B (study), C (cafeteria), D (sports), E (engineering)
+- Blocks: A, B, C, D, E (student housing)
+- Study Rooms: Study Room 1 (quiet), Study Room 2 (group), Computer Lab 1, Computer Lab 2
+- Common Areas: Cafeteria, TV Room, Game Room, Group Stage Room, Library
+- Facilities: Laundry Rooms A/B/C, Storage Room, Bike Storage
+- Transport: RER A (Noisy-le-Grand-Mont d'Est), Bus 303-306, Night Bus N34
+- Local Services: Carrefour City, KFC, McDonald's, Pharmacie de Noisy, BNP Paribas
+
+COMMON ECLA QUERIES:
+- Lost & Found: keys, student cards, phones, laptops
+- Technical Issues: WiFi, electricity, plumbing, heating
+- Transportation: airport pickup, Paris trips, car sharing
+- Food & Delivery: pizza, restaurants, campus delivery
+- Academic Help: study groups, French translation, tutoring
+- Social Events: parties, movie nights, sports tournaments
+- Administrative: student ID, rent payment, maintenance requests
 
 FIRST GREETING RESPONSE:
 When a user sends their first message (like "Hey", "Hello", etc.), respond with:
@@ -145,7 +164,7 @@ Just say your name and let's get started! 😊"
 REGISTRATION FLOW:
 1. Ask for name: "What's your name?"
 2. Ask for services: "What do you usually need help with?" or "What services do you offer?"
-3. Ask for location: "Where are you located?"
+3. Ask for location: "Where are you located?" (Block A, B, C, D, E)
 4. Confirm registration: "Perfect! You're all set! I'll connect you with neighbors when needed."
 
 SERVICE REQUEST FLOW:
@@ -156,7 +175,14 @@ SERVICE REQUEST FLOW:
 5. Two-way acceptance: Ask provider if available
 6. Connect users: "Great! Connecting you both..."
 
-Keep responses friendly, helpful, and community-focused. Use emojis and natural language."""
+ECLA-SPECIFIC RESPONSES:
+- Campus locations: Know all buildings, blocks, rooms
+- Local contacts: Emergency numbers, maintenance, IT support
+- Transportation: RER schedules, bus routes, airport access
+- Student services: Office hours, contact information
+- Common queries: Lost & found, technical issues, food delivery
+
+Keep responses friendly, helpful, and community-focused. Use emojis and natural language. Always provide ECLA-specific information when relevant."""
     
     def extract_info_with_gpt(self, message: str, phone: str) -> Dict:
         """Use GPT to extract information from message"""
@@ -329,6 +355,11 @@ User message: {message}
         # Check if this is a provider confirmation first
         if self.is_provider_confirmation(phone, message):
             return self.handle_provider_confirmation(phone, message)
+        
+        # Check for ECLA-specific queries first
+        ecla_response = self.handle_ecla_specific_query(phone, message)
+        if ecla_response:
+            return ecla_response
         
         # Handle conversation states
         if user_state.get('state') != 'idle':
@@ -1007,3 +1038,224 @@ Just say your name and let's get started! 😊"""
         
         conn.close()
         return result[0] if result else 5.0 
+
+    def handle_ecla_specific_query(self, phone: str, message: str) -> str:
+        """Handle ECLA-specific queries and provide campus information"""
+        message_lower = message.lower()
+        
+        # Lost & Found queries
+        if any(word in message_lower for word in ['lost', 'missing', 'found', 'keys', 'card', 'phone', 'laptop']):
+            return self.handle_lost_and_found(phone, message)
+        
+        # Technical issues
+        if any(word in message_lower for word in ['wifi', 'internet', 'electricity', 'heating', 'water', 'plumbing', 'broken']):
+            return self.handle_technical_issues(phone, message)
+        
+        # Transportation queries
+        if any(word in message_lower for word in ['airport', 'train', 'bus', 'rer', 'transport', 'ride', 'car']):
+            return self.handle_transportation_query(phone, message)
+        
+        # Food & delivery queries
+        if any(word in message_lower for word in ['food', 'delivery', 'restaurant', 'pizza', 'kfc', 'mcdonald']):
+            return self.handle_food_query(phone, message)
+        
+        # Academic help
+        if any(word in message_lower for word in ['study', 'tutoring', 'translation', 'french', 'academic', 'project']):
+            return self.handle_academic_query(phone, message)
+        
+        # Administrative queries
+        if any(word in message_lower for word in ['student id', 'rent', 'maintenance', 'office', 'admin']):
+            return self.handle_administrative_query(phone, message)
+        
+        # Campus location queries
+        if any(word in message_lower for word in ['where is', 'location', 'building', 'block', 'room', 'cafeteria', 'study']):
+            return self.handle_location_query(phone, message)
+        
+        # Default to service matching
+        return None
+    
+    def handle_lost_and_found(self, phone: str, message: str) -> str:
+        """Handle lost and found queries"""
+        return """🔍 **Lost & Found - ECLA Campus**
+
+**Lost something? Found something?**
+
+📍 **Check these locations:**
+• **Cafeteria** (Building C, 1st floor)
+• **Study Rooms** (Building B, 2nd-3rd floor)
+• **Computer Labs** (Building B & E)
+• **TV Room** (Building C, 2nd floor)
+• **Laundry Rooms** (Blocks A, B, C)
+
+📞 **Contact Security:**
+• Emergency: +33 1 XX XX XX XX
+• Lost & Found: +33 1 XX XX XX XX
+
+💡 **Need help finding someone?**
+Just say "I lost [item] in [location]" and I'll help you find someone who can help search!
+
+**Found something?**
+Say "I found [item] in [location]" and I'll connect you with the owner!"""
+    
+    def handle_technical_issues(self, phone: str, message: str) -> str:
+        """Handle technical issues queries"""
+        return """🔧 **Technical Issues - ECLA Campus**
+
+**Having technical problems?**
+
+📞 **Contact IT Support:**
+• **IT Help**: +33 1 XX XX XX XX
+• **Hours**: Monday-Friday 8:00-18:00
+• **Emergency**: 24/7 support available
+
+🏢 **Common Issues:**
+• **WiFi Problems**: Contact IT Support
+• **Electricity**: Call Maintenance +33 1 XX XX XX XX
+• **Plumbing**: Call Maintenance +33 1 XX XX XX XX
+• **Heating**: Call Maintenance +33 1 XX XX XX XX
+
+💡 **Need immediate help?**
+Just say "I need IT help" and I'll find someone nearby who can help!
+
+**Location**: IT Support Office (Building B, 1st floor)"""
+    
+    def handle_transportation_query(self, phone: str, message: str) -> str:
+        """Handle transportation queries"""
+        return """🚇 **Transportation - ECLA Campus**
+
+**Need help getting around?**
+
+🚆 **Public Transport:**
+• **RER A**: Noisy-le-Grand-Mont d'Est (5 min walk)
+• **Bus Lines**: 303, 304, 305, 306
+• **Night Bus**: N34 (after midnight)
+
+✈️ **Airport Access:**
+• **Charles de Gaulle**: 30 min by RER A
+• **Orly**: 45 min by RER A + bus
+
+🚗 **Car Sharing:**
+• **Airport Pickup**: €20-30 per trip
+• **Paris City Center**: €15-25 per trip
+• **IKEA/Shopping**: €10-20 per trip
+
+💡 **Need a ride?**
+Just say "I need airport pickup" or "I need ride to [destination]" and I'll find someone who can help!
+
+**Campus Location**: 5 min walk to RER A station"""
+    
+    def handle_food_query(self, phone: str, message: str) -> str:
+        """Handle food and delivery queries"""
+        return """🍕 **Food & Delivery - ECLA Campus**
+
+**Hungry? Need food delivery?**
+
+🏢 **Campus Food:**
+• **Cafeteria**: Building C, 1st floor
+• **Vending Machines**: All buildings
+
+🍔 **Nearby Restaurants:**
+• **KFC**: 3 min walk (Rue de la République)
+• **McDonald's**: 5 min walk (Place de l'Église)
+• **Pizza Hut**: 7 min walk (Avenue de la République)
+• **Local Cafés**: Multiple options within 10 min
+
+🛒 **Grocery Stores:**
+• **Carrefour City**: 2 min walk
+• **Monoprix**: 5 min walk
+• **Lidl**: 10 min walk
+
+💡 **Need delivery to your room?**
+Just say "I need food delivery" and I'll find someone who can pick up and deliver to your block!
+
+**Popular**: Pizza delivery, KFC runs, grocery shopping"""
+    
+    def handle_academic_query(self, phone: str, message: str) -> str:
+        """Handle academic help queries"""
+        return """📚 **Academic Help - ECLA Campus**
+
+**Need help with studies?**
+
+🏢 **Study Locations:**
+• **Study Room 1**: Quiet study (Building B, 2nd floor)
+• **Study Room 2**: Group study (Building B, 3rd floor)
+• **Computer Lab 1**: IT facilities (Building B, 1st floor)
+• **Computer Lab 2**: Engineering software (Building E, 2nd floor)
+• **Library**: Reference materials (Building B, 1st floor)
+
+📖 **Available Help:**
+• **Study Groups**: Engineering, Math, French
+• **Tutoring**: Individual sessions
+• **French Translation**: Documents, forms
+• **Project Help**: Group assignments
+• **IT Support**: Computer problems
+
+💡 **Need academic help?**
+Just say "I need study group" or "I need French translation" and I'll find someone who can help!
+
+**Popular**: Study groups, French translation, IT help"""
+    
+    def handle_administrative_query(self, phone: str, message: str) -> str:
+        """Handle administrative queries"""
+        return """📋 **Administrative - ECLA Campus**
+
+**Need help with admin stuff?**
+
+🏢 **Main Office**: Building A, 1st floor
+📞 **Contact**: +33 1 XX XX XX XX
+⏰ **Hours**: Monday-Friday 9:00-17:00
+
+📋 **Common Services:**
+• **Student ID Card**: Main office
+• **Rent Payment**: Student services
+• **Maintenance Requests**: +33 1 XX XX XX XX
+• **Visitor Registration**: Security office
+• **Package Pickup**: Main office
+
+📞 **Important Numbers:**
+• **Main Office**: +33 1 XX XX XX XX
+• **Student Services**: +33 1 XX XX XX XX
+• **Security**: +33 1 XX XX XX XX
+• **Maintenance**: +33 1 XX XX XX XX
+
+💡 **Need help with forms?**
+Just say "I need help with [form/document]" and I'll find someone who can help!
+
+**Location**: Building A, 1st floor"""
+    
+    def handle_location_query(self, phone: str, message: str) -> str:
+        """Handle campus location queries"""
+        return """📍 **Campus Locations - ECLA Campus**
+
+**Looking for something on campus?**
+
+🏢 **Main Buildings:**
+• **Building A**: Admin offices, student services
+• **Building B**: Study rooms, computer labs, library
+• **Building C**: Cafeteria, common areas, TV room
+• **Building D**: Sports facilities, gym
+• **Building E**: Engineering labs, workshops
+
+🏠 **Student Housing:**
+• **Block A**: Student apartments (floors 1-5)
+• **Block B**: Student apartments (floors 1-5)
+• **Block C**: Student apartments (floors 1-5)
+• **Block D**: Student apartments (floors 1-5)
+• **Block E**: Student apartments (floors 1-5)
+
+📚 **Study Areas:**
+• **Study Room 1**: Quiet study (Building B, 2nd floor)
+• **Study Room 2**: Group study (Building B, 3rd floor)
+• **Computer Lab 1**: IT facilities (Building B, 1st floor)
+• **Computer Lab 2**: Engineering software (Building E, 2nd floor)
+• **Library**: Reference materials (Building B, 1st floor)
+
+🏃 **Common Areas:**
+• **Cafeteria**: Building C, 1st floor
+• **TV Room**: Building C, 2nd floor
+• **Game Room**: Building C, 2nd floor
+• **Group Stage Room**: Building C, 1st floor
+• **Laundry Rooms**: Blocks A, B, C (ground floor)
+
+💡 **Need directions?**
+Just say "Where is [location]" and I'll help you find it!""" 
