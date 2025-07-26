@@ -633,13 +633,23 @@ Just say your name and let's get started! 😊"""
         """Handle role selection (provider vs seeker)"""
         message_lower = message.lower().strip()
         
-        if any(word in message_lower for word in ['provider', 'help', 'offer', 'service provider', '🛠️']):
+        # Check if user mentioned being a provider
+        if any(word in message_lower for word in ['provider', 'help', 'offer', 'service provider', '🛠️', 'cook', 'food', 'give', 'can help']):
             # User wants to be a service provider
             user_data = self.get_user_state(phone)['data']
             user_data['role'] = 'provider'
-            self.set_user_state(phone, 'registering_services', user_data)
             
-            return "Great! 🛠️ What services can you offer?\n\nExamples: laundry, food delivery, translation, shopping, tech help, prefecture assistance, etc.\n\nJust tell me what you can help with!"
+            # Check if they also mentioned their services in the same message
+            if any(word in message_lower for word in ['cook', 'food', 'laundry', 'translation', 'shopping', 'tech', 'help', 'delivery']):
+                # Extract services from the message
+                services = message.strip()
+                user_data['services'] = services
+                self.set_user_state(phone, 'registering_location', user_data)
+                return f"Perfect! 🛠️ You offer: {services}\n\nWhich accommodation type are you in? (Studio, Colocation, Hostel, etc.)"
+            else:
+                # Just role selection, ask for services
+                self.set_user_state(phone, 'registering_services', user_data)
+                return "Great! 🛠️ What services can you offer?\n\nExamples: laundry, food delivery, translation, shopping, tech help, prefecture assistance, etc.\n\nJust tell me what you can help with!"
         
         elif any(word in message_lower for word in ['seeker', 'need', 'help me', 'service seeker', '🤝']):
             # User needs help
@@ -671,7 +681,7 @@ Just say your name and let's get started! 😊"""
         user_data = self.get_user_state(phone)['data']
         user_data['services'] = services
         self.set_user_state(phone, 'registering_location', user_data)
-        return f"Great! You offer: {services} 🛠️\n\nWhich block are you in? (e.g., Block A, Block B, Main Campus, Student Housing)"
+        return f"Great! You offer: {services} 🛠️\n\nWhich accommodation type are you in? (Studio, Colocation, Hostel, etc.)"
     
     def handle_location_registration_with_gpt(self, phone: str, message: str, extracted_info: Dict) -> str:
         """Handle location registration with GPT"""
