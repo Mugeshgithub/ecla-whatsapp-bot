@@ -538,24 +538,11 @@ It will redirect you to the right person who is available for this kind of servi
 Just say your name and let's get started! 😊"""
 
     def handle_help_request_with_gpt(self, phone: str, message: str, extracted_info: Dict) -> str:
-        """Handle help requests with GPT"""
-        service = extracted_info.get("service")
-        time = extracted_info.get("time")
-        location = extracted_info.get("location")
+        """Handle help requests with enhanced 3-option matching"""
+        service = extracted_info.get("service", "general")
         
-        user_data = {
-            'service': service or 'general',
-            'time': time or 'flexible',
-            'location': location or 'campus'
-        }
-        
-        self.set_user_state(phone, 'requesting_service', user_data)
-        
-        if service and time and location:
-            # Complete request in one go
-            return self.complete_request_with_gpt(phone, user_data)
-        else:
-            return self.generate_response_with_gpt(message, phone, extracted_info, {})
+        # Use the enhanced service request flow
+        return self.handle_service_request_with_gpt(phone, message, extracted_info)
     
     def handle_registration_with_gpt(self, phone: str, message: str, extracted_info: Dict) -> str:
         """Handle smart conversational registration with GPT"""
@@ -603,27 +590,12 @@ Just say your name and let's get started! 😊"""
             return "I'll help you find what you need! 🤝\n\nWhat do you need help with?\n\nExamples: I need cigarettes, I need laundry help, I need someone to go to prefecture with me, etc.\n\nJust tell me what you need!"
 
     def handle_service_need(self, phone: str, message: str) -> str:
-        """Handle when user tells us what they need"""
+        """Handle when user tells us what they need with enhanced matching"""
         service = message.strip()
-        user_data = self.get_user_state(phone)['data']
-        user_data['service'] = service
         
-        # Try to find matches immediately
-        matches = self.find_matches(service, "campus")  # Default location
-        
-        if matches:
-            # Show matches
-            response = "Found these people who can help:\n\n"
-            for i, match in enumerate(matches[:3], 1):
-                response += f"{i}️⃣ {match['name']} - {match['services']}\n"
-            response += "\nReply with 1, 2, or 3 to connect!"
-            self.set_user_state(phone, 'choosing_provider', user_data)
-        else:
-            # Ask for more details
-            self.set_user_state(phone, 'asking_time', user_data)
-            response = f"Got it! You need: {service}\n\nWhen do you need this? (e.g., today, tomorrow, this week)"
-        
-        return response
+        # Use the enhanced service request flow
+        extracted_info = {"service": service}
+        return self.handle_service_request_with_gpt(phone, message, extracted_info)
     
     def handle_services_registration_with_gpt(self, phone: str, message: str, extracted_info: Dict) -> str:
         """Handle services registration with GPT"""
