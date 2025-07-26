@@ -115,18 +115,52 @@ class GPTECLABot:
             self.conversation_history[phone] = self.conversation_history[phone][-10:]
     
     def create_system_prompt(self) -> str:
-        """Create system prompt for GPT with ECLA campus knowledge"""
-        return """You are an ECLA premium community service matching bot for Résidence ECLA, 93160 Noisy-le-Grand. Your role is to connect ECLA community members through smart, conversational registration and intelligent 3-option matching. You can respond in English, French, or any language the user prefers.
+        """Create system prompt for GPT with real ECLA campus knowledge"""
+        return """You are an ECLA premium community service matching bot for ECLA Paris Noisy-le-Grand. Your role is to connect ECLA community members through smart, conversational registration and intelligent 3-option matching. You can respond in English, French, or any language the user prefers.
 
-ECLA CAMPUS KNOWLEDGE:
-- Location: Résidence ECLA, 93160 Noisy-le-Grand, France
-- Buildings: A (admin), B (study), C (cafeteria), D (sports), E (engineering)
-- Blocks: A, B, C, D, E (student housing)
-- Study Rooms: Study Room 1 (quiet), Study Room 2 (group), Computer Lab 1, Computer Lab 2
-- Common Areas: Cafeteria, TV Room, Game Room, Group Stage Room, Library
-- Facilities: Laundry Rooms A/B/C, Storage Room, Bike Storage
-- Transport: RER A (Noisy-le-Grand-Mont d'Est), Bus 303-306, Night Bus N34
-- Local Services: Carrefour City, KFC, McDonald's, Pharmacie de Noisy, BNP Paribas
+REAL ECLA CAMPUS KNOWLEDGE:
+- Location: ECLA Paris Noisy-le-Grand, France
+- Type: Student residence with coliving spaces
+- Concept: "Une résidence durable avec des logements modernes pour le coliving"
+- Target: Students and young professionals
+- Slogan: "D'une nuit à toute une vie, faites d'Ecla votre Maison"
+
+ACCOMMODATION TYPES:
+- Mini Studio: €910/month (120cm bed, kitchenette, private bathroom)
+- Studio: €930/month (120cm bed, equipped kitchen, private bathroom)
+- Cabane: €1100/month (140cm double bed, living space, kitchen)
+- T2: €1100/month (140cm or 180cm double bed, living space)
+- Private Room in Colocation: €750/month (shared apartment, private bathroom)
+- Bed in Shared Apartment: €550/month (shared living space)
+- Hostel Bed: €400/month (4-8 person shared room)
+
+SHARED SPACES & FACILITIES:
+- The Agora: 15m² giant screen, foosball, ping-pong tables
+- The Kitchen: 3 shared kitchens with dining areas
+- The Cinebox: HD cinema rooms
+- Sports: Boxing room, yoga room
+- Study: Library, study spaces, coworking areas
+- Services: The Laundry (paid), bike storage, 24/7 security, WiFi
+
+NEARBY UNIVERSITIES:
+- Université Gustave Eiffel
+- ESIEE
+- UPEC
+- ENPC
+- Other Paris universities (30 min via RER A)
+
+TRANSPORTATION:
+- RER A: Direct connection to Paris (30 min to city center)
+- Bus lines: Multiple options available
+- Cycling: Bike paths available
+
+LOCAL ESSENTIALS (Noisy-le-Grand):
+- Grocery Stores: Carrefour City, Monoprix, Lidl
+- Restaurants: KFC, McDonald's, Pizza Hut, local cafés
+- Pharmacies: Pharmacie de Noisy, Pharmacie Centrale
+- Banks: BNP Paribas, Crédit Agricole
+- Medical: Medical Center, Dentist, Emergency Hospital
+- Transport: RER A station (Noisy-le-Grand-Mont d'Est)
 
 COMMON ECLA QUERIES:
 - Lost & Found: keys, student cards, phones, laptops
@@ -136,6 +170,7 @@ COMMON ECLA QUERIES:
 - Academic Help: study groups, French translation, tutoring
 - Social Events: parties, movie nights, sports tournaments
 - Administrative: student ID, rent payment, maintenance requests
+- Accommodation: room changes, roommate issues, facilities
 
 FIRST GREETING RESPONSE:
 When a user sends their first message (like "Hey", "Hello", etc.), respond with:
@@ -164,7 +199,7 @@ Just say your name and let's get started! 😊"
 REGISTRATION FLOW:
 1. Ask for name: "What's your name?"
 2. Ask for services: "What do you usually need help with?" or "What services do you offer?"
-3. Ask for location: "Where are you located?" (Block A, B, C, D, E)
+3. Ask for location: "Where are you located?" (Studio, Colocation, Hostel, etc.)
 4. Confirm registration: "Perfect! You're all set! I'll connect you with neighbors when needed."
 
 SERVICE REQUEST FLOW:
@@ -176,11 +211,13 @@ SERVICE REQUEST FLOW:
 6. Connect users: "Great! Connecting you both..."
 
 ECLA-SPECIFIC RESPONSES:
-- Campus locations: Know all buildings, blocks, rooms
+- Accommodation types: Know all room types and pricing
+- Shared spaces: Agora, Kitchen, Cinebox, sports facilities
 - Local contacts: Emergency numbers, maintenance, IT support
-- Transportation: RER schedules, bus routes, airport access
+- Transportation: RER A schedules, bus routes, airport access
 - Student services: Office hours, contact information
 - Common queries: Lost & found, technical issues, food delivery
+- Local knowledge: Grocery stores, restaurants, pharmacies, banks
 
 Keep responses friendly, helpful, and community-focused. Use emojis and natural language. Always provide ECLA-specific information when relevant."""
     
@@ -1075,113 +1112,120 @@ Just say your name and let's get started! 😊"""
         return None
     
     def handle_lost_and_found(self, phone: str, message: str) -> str:
-        """Handle lost and found queries"""
-        return """🔍 **Lost & Found - ECLA Campus**
+        """Handle lost and found queries with real ECLA information"""
+        return """🔍 **Lost & Found - ECLA Noisy-le-Grand**
 
 **Lost something? Found something?**
 
 📍 **Check these locations:**
-• **Cafeteria** (Building C, 1st floor)
-• **Study Rooms** (Building B, 2nd-3rd floor)
-• **Computer Labs** (Building B & E)
-• **TV Room** (Building C, 2nd floor)
-• **Laundry Rooms** (Blocks A, B, C)
+• **The Agora** - Main social area (giant screen, foosball, ping-pong)
+• **The Kitchen** - 3 shared kitchens with dining areas
+• **The Cinebox** - HD cinema rooms
+• **Library** - Study spaces and coworking areas
+• **Sports facilities** - Boxing room, yoga room
+• **The Laundry** - Paid laundry service
 
 📞 **Contact Security:**
-• Emergency: +33 1 XX XX XX XX
-• Lost & Found: +33 1 XX XX XX XX
+• **24/7 Security** - Available on-site
+• **Main Office** - For lost & found items
+• **Emergency** - 24/7 support available
 
 💡 **Need help finding someone?**
 Just say "I lost [item] in [location]" and I'll help you find someone who can help search!
 
 **Found something?**
-Say "I found [item] in [location]" and I'll connect you with the owner!"""
+Say "I found [item] in [location]" and I'll connect you with the owner!
+
+**Location**: ECLA Paris Noisy-le-Grand"""
     
     def handle_technical_issues(self, phone: str, message: str) -> str:
-        """Handle technical issues queries"""
-        return """🔧 **Technical Issues - ECLA Campus**
+        """Handle technical issues queries with real ECLA information"""
+        return """🔧 **Technical Issues - ECLA Noisy-le-Grand**
 
 **Having technical problems?**
 
-📞 **Contact IT Support:**
-• **IT Help**: +33 1 XX XX XX XX
-• **Hours**: Monday-Friday 8:00-18:00
-• **Emergency**: 24/7 support available
+📞 **Contact Support:**
+• **24/7 Security** - Available on-site
+• **Main Office** - Monday-Friday 9:00-17:00
+• **Emergency Support** - 24/7 available
 
 🏢 **Common Issues:**
-• **WiFi Problems**: Contact IT Support
-• **Electricity**: Call Maintenance +33 1 XX XX XX XX
-• **Plumbing**: Call Maintenance +33 1 XX XX XX XX
-• **Heating**: Call Maintenance +33 1 XX XX XX XX
+• **WiFi Problems** - High-speed WiFi included in rent
+• **Electricity** - All-inclusive (water, electricity, heating, WiFi)
+• **Plumbing** - Contact main office
+• **Heating** - All-inclusive in rent
+• **Kitchen Issues** - 3 shared kitchens available
 
 💡 **Need immediate help?**
 Just say "I need IT help" and I'll find someone nearby who can help!
 
-**Location**: IT Support Office (Building B, 1st floor)"""
+**All accommodations include**: Water, electricity, heating, WiFi"""
     
     def handle_transportation_query(self, phone: str, message: str) -> str:
-        """Handle transportation queries"""
-        return """🚇 **Transportation - ECLA Campus**
+        """Handle transportation queries with real ECLA information"""
+        return """🚇 **Transportation - ECLA Noisy-le-Grand**
 
 **Need help getting around?**
 
 🚆 **Public Transport:**
-• **RER A**: Noisy-le-Grand-Mont d'Est (5 min walk)
-• **Bus Lines**: 303, 304, 305, 306
-• **Night Bus**: N34 (after midnight)
+• **RER A**: Direct connection to Paris (30 min to city center)
+• **Bus Lines**: Multiple options available
+• **Cycling**: Bike paths available
+• **Bike Storage**: Available on-site
 
 ✈️ **Airport Access:**
-• **Charles de Gaulle**: 30 min by RER A
-• **Orly**: 45 min by RER A + bus
+• **Charles de Gaulle**: Via RER A
+• **Orly**: Via RER A + bus
 
 🚗 **Car Sharing:**
 • **Airport Pickup**: €20-30 per trip
 • **Paris City Center**: €15-25 per trip
-• **IKEA/Shopping**: €10-20 per trip
+• **University Transport**: ESIEE, UPEC, ENPC, Université Gustave Eiffel
+• **Shopping Trips**: IKEA, grocery stores
 
 💡 **Need a ride?**
 Just say "I need airport pickup" or "I need ride to [destination]" and I'll find someone who can help!
 
-**Campus Location**: 5 min walk to RER A station"""
+**Location**: Near RER A station for easy Paris access"""
     
     def handle_food_query(self, phone: str, message: str) -> str:
-        """Handle food and delivery queries"""
-        return """🍕 **Food & Delivery - ECLA Campus**
+        """Handle food and delivery queries with real ECLA information"""
+        return """🍕 **Food & Delivery - ECLA Noisy-le-Grand**
 
 **Hungry? Need food delivery?**
 
 🏢 **Campus Food:**
-• **Cafeteria**: Building C, 1st floor
-• **Vending Machines**: All buildings
+• **The Kitchen**: 3 shared kitchens with dining areas
+• **Kitchenettes**: Available in Mini Studios and Studios
+• **Equipped Kitchens**: Available in all accommodation types
 
 🍔 **Nearby Restaurants:**
-• **KFC**: 3 min walk (Rue de la République)
-• **McDonald's**: 5 min walk (Place de l'Église)
-• **Pizza Hut**: 7 min walk (Avenue de la République)
-• **Local Cafés**: Multiple options within 10 min
+• **KFC**: Walking distance
+• **McDonald's**: Walking distance
+• **Pizza Hut**: Walking distance
+• **Local Cafés**: Multiple options nearby
 
 🛒 **Grocery Stores:**
-• **Carrefour City**: 2 min walk
-• **Monoprix**: 5 min walk
-• **Lidl**: 10 min walk
+• **Carrefour City**: Walking distance
+• **Monoprix**: Walking distance
+• **Lidl**: Walking distance
 
 💡 **Need delivery to your room?**
-Just say "I need food delivery" and I'll find someone who can pick up and deliver to your block!
+Just say "I need food delivery" and I'll find someone who can pick up and deliver to your accommodation!
 
-**Popular**: Pizza delivery, KFC runs, grocery shopping"""
+**Popular**: Pizza delivery, KFC runs, grocery shopping, shared cooking"""
     
     def handle_academic_query(self, phone: str, message: str) -> str:
-        """Handle academic help queries"""
-        return """📚 **Academic Help - ECLA Campus**
+        """Handle academic help queries with real ECLA information"""
+        return """📚 **Academic Help - ECLA Noisy-le-Grand**
 
 **Need help with studies?**
 
 🏢 **Study Locations:**
-• **Study Room 1**: Quiet study (Building B, 2nd floor)
-• **Study Room 2**: Group study (Building B, 3rd floor)
-• **Computer Lab 1**: IT facilities (Building B, 1st floor)
-• **Computer Lab 2**: Engineering software (Building E, 2nd floor)
-• **Library**: Reference materials (Building B, 1st floor)
+• **Library**: Study spaces and coworking areas
+• **Study Spaces**: Available throughout the residence
+• **Coworking Areas**: Modern workspaces
+• **Your Room**: All accommodations have desks
 
 📖 **Available Help:**
 • **Study Groups**: Engineering, Math, French
@@ -1190,72 +1234,78 @@ Just say "I need food delivery" and I'll find someone who can pick up and delive
 • **Project Help**: Group assignments
 • **IT Support**: Computer problems
 
+🎓 **Nearby Universities:**
+• **Université Gustave Eiffel**
+• **ESIEE**
+• **UPEC**
+• **ENPC**
+• **Paris universities** (30 min via RER A)
+
 💡 **Need academic help?**
 Just say "I need study group" or "I need French translation" and I'll find someone who can help!
 
-**Popular**: Study groups, French translation, IT help"""
+**Popular**: Study groups, French translation, IT help, exam preparation"""
     
     def handle_administrative_query(self, phone: str, message: str) -> str:
-        """Handle administrative queries"""
-        return """📋 **Administrative - ECLA Campus**
+        """Handle administrative queries with real ECLA information"""
+        return """📋 **Administrative - ECLA Noisy-le-Grand**
 
 **Need help with admin stuff?**
 
-🏢 **Main Office**: Building A, 1st floor
-📞 **Contact**: +33 1 XX XX XX XX
+🏢 **Main Office**: On-site
+📞 **Contact**: Available through main office
 ⏰ **Hours**: Monday-Friday 9:00-17:00
 
 📋 **Common Services:**
-• **Student ID Card**: Main office
-• **Rent Payment**: Student services
-• **Maintenance Requests**: +33 1 XX XX XX XX
-• **Visitor Registration**: Security office
+• **Accommodation**: Mini Studio (€910), Studio (€930), Cabane (€1100), T2 (€1100)
+• **Shared Options**: Private Room in Colocation (€750), Bed in Shared Apartment (€550), Hostel Bed (€400)
+• **Rent Payment**: All-inclusive (water, electricity, heating, WiFi)
+• **Maintenance Requests**: Contact main office
 • **Package Pickup**: Main office
+• **Visitor Registration**: Contact security
 
-📞 **Important Numbers:**
-• **Main Office**: +33 1 XX XX XX XX
-• **Student Services**: +33 1 XX XX XX XX
-• **Security**: +33 1 XX XX XX XX
-• **Maintenance**: +33 1 XX XX XX XX
+📞 **Important Information:**
+• **24/7 Security**: Available on-site
+• **All-inclusive Rent**: Water, electricity, heating, WiFi
+• **Furnished**: All accommodations fully furnished
+• **Flexible Stays**: From one night to long-term
 
 💡 **Need help with forms?**
 Just say "I need help with [form/document]" and I'll find someone who can help!
 
-**Location**: Building A, 1st floor"""
+**Location**: ECLA Paris Noisy-le-Grand"""
     
     def handle_location_query(self, phone: str, message: str) -> str:
-        """Handle campus location queries"""
-        return """📍 **Campus Locations - ECLA Campus**
+        """Handle campus location queries with real ECLA information"""
+        return """📍 **ECLA Noisy-le-Grand Locations**
 
-**Looking for something on campus?**
+**Looking for something at ECLA?**
 
-🏢 **Main Buildings:**
-• **Building A**: Admin offices, student services
-• **Building B**: Study rooms, computer labs, library
-• **Building C**: Cafeteria, common areas, TV room
-• **Building D**: Sports facilities, gym
-• **Building E**: Engineering labs, workshops
+🏢 **Accommodation Types:**
+• **Mini Studio**: €910/month (120cm bed, kitchenette, private bathroom)
+• **Studio**: €930/month (120cm bed, equipped kitchen, private bathroom)
+• **Cabane**: €1100/month (140cm double bed, living space, kitchen)
+• **T2**: €1100/month (140cm or 180cm double bed, living space)
+• **Private Room in Colocation**: €750/month (shared apartment, private bathroom)
+• **Bed in Shared Apartment**: €550/month (shared living space)
+• **Hostel Bed**: €400/month (4-8 person shared room)
 
-🏠 **Student Housing:**
-• **Block A**: Student apartments (floors 1-5)
-• **Block B**: Student apartments (floors 1-5)
-• **Block C**: Student apartments (floors 1-5)
-• **Block D**: Student apartments (floors 1-5)
-• **Block E**: Student apartments (floors 1-5)
+🏃 **Shared Spaces:**
+• **The Agora**: 15m² giant screen, foosball, ping-pong tables
+• **The Kitchen**: 3 shared kitchens with dining areas
+• **The Cinebox**: HD cinema rooms
+• **Sports**: Boxing room, yoga room
+• **Study**: Library, study spaces, coworking areas
+• **Services**: The Laundry (paid), bike storage, 24/7 security, WiFi
 
-📚 **Study Areas:**
-• **Study Room 1**: Quiet study (Building B, 2nd floor)
-• **Study Room 2**: Group study (Building B, 3rd floor)
-• **Computer Lab 1**: IT facilities (Building B, 1st floor)
-• **Computer Lab 2**: Engineering software (Building E, 2nd floor)
-• **Library**: Reference materials (Building B, 1st floor)
-
-🏃 **Common Areas:**
-• **Cafeteria**: Building C, 1st floor
-• **TV Room**: Building C, 2nd floor
-• **Game Room**: Building C, 2nd floor
-• **Group Stage Room**: Building C, 1st floor
-• **Laundry Rooms**: Blocks A, B, C (ground floor)
+🎓 **Nearby Universities:**
+• **Université Gustave Eiffel**
+• **ESIEE**
+• **UPEC**
+• **ENPC**
+• **Paris universities** (30 min via RER A)
 
 💡 **Need directions?**
-Just say "Where is [location]" and I'll help you find it!""" 
+Just say "Where is [location]" and I'll help you find it!
+
+**All accommodations include**: Water, electricity, heating, WiFi""" 
